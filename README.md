@@ -2,7 +2,11 @@
 > Pretty much msfvenom, but I hate Metasploit >:(
 
 ## Installation:
-- Clone this repo to whatever directory you want
+- Clone this repo to whatever directory you want.
+  Note: This repo uses submodules so use the command below to avoid headaches:
+```
+git clone --recurse-submodules https://github.com/owenCocjin/HackGen.git
+```
 - Change the path of the rshells.db database to the <b>ABSOLUTE</b> path of the install dir
 - Optional: Link the "hackgen.py" script to somewhere in your path so it can be executed from anywhere!
 
