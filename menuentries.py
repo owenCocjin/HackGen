@@ -15,6 +15,8 @@ Generate rshell payloads for a given ip and port.
   -f; --platform=<p>; Specify platform to get rshell from.
                       Use -l to list all rshells.
   -h; --help;         Print this page
+  -i; --id=<id>;      Use id instead of specifying platform and name
+                      Ignores -f and -n if called
   -l; --list;         List all rshells.
                       If -f was specified, only list rshells for that platform
   -n; --name=<n>;     Name of the rshell to use
@@ -37,14 +39,14 @@ def listFunc(p):
 
 	#If the platform was give, list all shells from that 
 	if p:
-		loop_data=curse.execute("SELECT name,description,data,platform FROM rshells WHERE platform=?",(p,)).fetchall()
+		loop_data=curse.execute("SELECT name,description,data,platform,uid FROM rshells WHERE platform=?",(p,)).fetchall()
 	else:
 		#Print all available platforms
 		print(f"Available platforms:")
 		for n in curse.execute("SELECT DISTINCT platform FROM rshells ORDER BY platform").fetchall():
 			print(f"  \033[1m{n[0]}\033[0m")
 		print(f"\n  --- \n")
-		loop_data=curse.execute("SELECT name,description,data,platform FROM rshells ORDER BY platform").fetchall()
+		loop_data=curse.execute("SELECT name,description,data,platform,uid FROM rshells ORDER BY platform").fetchall()
 
 	for data in loop_data:
 		payload=data[2].replace("^LOCAL_IP^",f"""\033[94m<ip>\033[0m""").replace("^LOCAL_PORT^",f"""\033[95m<port>\033[0m""")
@@ -56,7 +58,7 @@ def listFunc(p):
 				printout=f"{payload[:50]}\033[0m..."
 		else:
 			printout=payload
-		print(f"""\033[1m{data[3]} - {data[0]}\033[0m:\n\033[3m{data[1]}\033[0m\n  {printout}\n""")
+		print(f"""[{data[4]}] \033[1m{data[3]} - {data[0]}\033[0m:\n\033[3m{data[1]}\033[0m\n  {printout}\n""")
 
 	exit(0)
 	return True
@@ -79,12 +81,22 @@ def portFunc(p:int):
 		print(f"[|x:menu:port]: Invalid port: {p}")
 	return p
 
+def idFunc(i):
+	'''Make sure the given ID exists in the DB'''
+	if not curse.execute(f"SELECT id FROM rshells WHERE uid=?",(i,)).fetchall():
+		print(f"[|x:idFunc]: Invalid id: {i}")
+		exit(1)
+
+	return i
+
+
 EntryFlag("help",['h',"help"],helpFunc)
 EntryArg("ip_flag",["ip"],ipFunc)
+EntryArg("id",['i',"id"],idFunc)
 EntryFlag("base64encode",['b',"base64"],lambda:True)
 EntryFlag("list",['l',"list"],listFunc,recurse=["platform"])
-EntryArg("name",['n',"name"],lambda n:n,strictif=["list"])
-EntryArg("platform",['f',"platform"],platformFunc,strictif=["list"])
+EntryArg("name",['n',"name"],lambda n:n,strictif=["list","id"])
+EntryArg("platform",['f',"platform"],platformFunc,strictif=["list","id"])
 EntryArg("port_flag",["port"],portFunc,default=3184)
 EntryFlag("urlencode",['u',"urlencode"],lambda:True)
 EntryFlag("web",['w',"web","webserver","server"],lambda:True)

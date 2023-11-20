@@ -9,17 +9,21 @@ PARSER=MENU.parse(True,strict=True)
 
 def main():
 	#Retrieve the rshell data from the db
-	res=curse.execute("SELECT data,req_ip,req_port FROM rshells WHERE platform=? AND name=?",(PARSER["platform"],PARSER["name"])).fetchall()[0]
+	if PARSER["id"]:
+		res=curse.execute("SELECT platform,name,data,req_ip,req_port FROM rshells WHERE uid=?",(PARSER["id"],)).fetchall()[0]
+	else:
+		res=curse.execute("SELECT platform,name,data,req_ip,req_port FROM rshells WHERE platform=? AND name=?",(PARSER["platform"],PARSER["name"])).fetchall()[0]
+
 	if not res:
 		print(f"[|x:main]: No rshells found. Try a different name?")
 		exit(3)
 
 	#Check if an IP and PORT are required, and if so make sure ones were provided
-	if (res[1] and not PARSER["ip"]) or (res[2] and not PARSER["port"]):
-		print(f"""[|x:main]: The {PARSER["name"]} rshell requires an ip and/or port. Make sure they are provided!""")
+	if (res[3] and not PARSER["ip"]) or (res[4] and not PARSER["port"]):
+		print(f"""[|x:main]: The \033[1m{res[0]} - {res[1]}\033[0m rshell requires an ip and/or port. Make sure they are provided!""")
 		exit(3)
 
-	data=res[0]
+	data=res[2]
 
 	#URL encode the data if the flag was called
 	if PARSER["urlencode"]:
