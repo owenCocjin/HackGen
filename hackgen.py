@@ -40,7 +40,7 @@ def main():
 	#Start a webserver that will serve the payload (for easy transfers to targets)
 	if PARSER["web"]:
 		print(f"[|x:main]: Starting web server on port 8000...")
-		print(f"[|x:main]: The rshell will be serverd from any endpoint. From the target, use wget or write curl output to a file")
+		print(f"[|x:main]: The rshell will be served from any endpoint. From the target, use wget or write curl output to a file")
 
 		serv=socket.socket(socket.AF_INET,socket.SOCK_STREAM)
 		serv.setsockopt(socket.SOL_SOCKET,socket.SO_REUSEADDR,1)
