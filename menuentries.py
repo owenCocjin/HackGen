@@ -41,10 +41,17 @@ def listFunc(p):
 	if p:
 		loop_data=curse.execute("SELECT name,description,data,platform,uid FROM rshells WHERE platform=?",(p,)).fetchall()
 	else:
+		#Get longest platform name for formatting
+		spaces=curse.execute("SELECT MAX(LENGTH(platform)) FROM rshells").fetchall()[0][0]
+
 		#Print all available platforms
-		print(f"Available platforms:")
+		print(f"Available platforms + payload count:")
 		for n in curse.execute("SELECT DISTINCT platform FROM rshells ORDER BY platform").fetchall():
-			print(f"  \033[1m{n[0]}\033[0m")
+			n=n[0]
+
+			#Get number of payloads for the current platform
+			payloadcount=curse.execute("SELECT COUNT() FROM rshells WHERE platform=?",(n,)).fetchall()[0][0]
+			print(f"  \033[1m{n}{' '*(spaces-len(n))} [{payloadcount}]\033[0m")
 		print(f"\n  --- \n")
 		loop_data=curse.execute("SELECT name,description,data,platform,uid FROM rshells ORDER BY platform").fetchall()
 
@@ -54,8 +61,8 @@ def listFunc(p):
 			printout="\033[90m<multi-line file; redacted>\033[0m"
 		elif type(payload)==bytes:
 			printout="\033[90m<binary data; redacted>\033[0m"
-		elif len(payload)>50:
-				printout=f"{payload[:50]}\033[0m..."
+		elif len(payload)>80:
+				printout=f"{payload[:80]}\033[0m..."
 		else:
 			printout=payload
 		print(f"""[{data[4]}] \033[1m{data[3]} - {data[0]}\033[0m:\n\033[3m{data[1]}\033[0m\n  {printout}\n""")
