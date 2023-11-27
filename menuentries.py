@@ -22,7 +22,7 @@ Generate rshell payloads for a given ip and port.
   -n; --name=<n>;     Name of the rshell to use
   -u; --urlencode;    URL encode the rshell before outputting it
   -w; --webserver;    Start a webserver that will output the rshell instead of outputting to stdout.
-                      This is userful to get the rshell directly onto a target (via curl/wget) instead of sending it as a file, etc...
+                      This is useful to get the rshell directly onto a target (via curl/wget) instead of sending it as a file, etc...
 """)
 
 def ipFunc(i:str):
