@@ -46,23 +46,37 @@ def main():
 		serv.setsockopt(socket.SOL_SOCKET,socket.SO_REUSEADDR,1)
 		serv.bind(("0.0.0.0",8000))
 		serv.listen()
-		cli,cli_addr=serv.accept()
-		print(f"[|x:main]: Connection from: {cli_addr}")
 
-		print(cli.recv(2048))
-		cli.send(f"""HTTP/1.1 200 OK\r
-Content-Type: application/octet-stream\r
-Content-Length: {len(data)}\r
-\r\n""".encode())
-		cli.send(data.encode() if type(data)!=bytes else data)
-
-		cli.close()
+		#Make persistent if asked
+		if PARSER["persistent"]:
+			print(f"[|x:main]: Looping server...")
+			while True:
+				webserver(serv,data)
+		else:
+			print(f"[|x:main]: Closing after first request...")
+			webserver(serv,data)
 		# time.sleep(3)
 
 	else:
 		print(data)
 
 
+
+
+
+def webserver(serv,data):
+	'''Handle the webserver'''
+	cli,cli_addr=serv.accept()
+	print(f"[|x:main]: Connection from: {cli_addr}")
+
+	print(cli.recv(2048))
+	cli.send(f"""HTTP/1.1 200 OK\r
+Content-Type: application/octet-stream\r
+Content-Length: {len(data)}\r
+\r\n""".encode())
+	cli.send(data.encode() if type(data)!=bytes else data)
+
+	cli.close()
 
 if __name__=="__main__":
 	try:

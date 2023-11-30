@@ -3,7 +3,7 @@ from ProgMenu.progmenu import EntryArg,EntryFlag,EntryPositional
 from globe import curse
 
 def helpFunc():
-	print("""hackgen.py [-bfhilpuw] <local ip> <local port>
+	print("""hackgen.py [-bfhilnpuw] <local ip> <local port>
 Generate rshell payloads for a given ip and port.
   <local ip>;         Your IP
   <local port>;       Your port
@@ -20,6 +20,7 @@ Generate rshell payloads for a given ip and port.
   -l; --list;         List all rshells.
                       If -f was specified, only list rshells for that platform
   -n; --name=<n>;     Name of the rshell to use
+  -p; --persistent;   Tells the webserver not to close after first request
   -u; --urlencode;    URL encode the rshell before outputting it
   -w; --webserver;    Start a webserver that will output the rshell instead of outputting to stdout.
                       This is useful to get the rshell directly onto a target (via curl/wget) instead of sending it as a file, etc...
@@ -107,5 +108,6 @@ EntryArg("platform",['f',"platform"],platformFunc,strictif=["list","id"])
 EntryArg("port_flag",["port"],portFunc,default=3184)
 EntryFlag("urlencode",['u',"urlencode"],lambda:True)
 EntryFlag("web",['w',"web","webserver","server"],lambda:True)
+EntryFlag("persistent",['p',"persistent","persistence"],lambda:True)
 EntryPositional("ip",0,ipFunc,alt=["ip_flag"])
 EntryPositional("port",1,portFunc,alt=["port_flag"])
