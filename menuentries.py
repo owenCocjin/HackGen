@@ -1,6 +1,7 @@
 import re
 from ProgMenu.progmenu import EntryArg,EntryFlag,EntryPositional
 from globe import curse
+from encoding_modules import encoding_map
 
 def helpFunc():
 	print("""hackgen.py [-bfhilnpuw] <local ip> <local port>
@@ -11,7 +12,8 @@ Generate rshell payloads for a given ip and port.
                       Alternate to positional arg
   --port;             Your port.
                       Alternate to positional arg
-  -b; --base64;       Base64 encode the payload
+  -e; --encode=<e>;   Comma separated list of modules to encode the payload with.
+                      Encoding happens in order given, with the ability to encode multiple times
   -f; --platform=<p>; Specify platform to get rshell from.
                       Use -l to list all rshells.
   -h; --help;         Print this page
@@ -24,10 +26,15 @@ Generate rshell payloads for a given ip and port.
                       Tries to convert from hex first
                       This causes the output to be in bytes!
   -p; --persistent;   Tells the webserver not to close after first request
-  -u; --urlencode;    URL encode the rshell before outputting it
   -w; --webserver;    Start a webserver that will output the rshell instead of outputting to stdout.
                       This is useful to get the rshell directly onto a target (via curl/wget) instead of sending it as a file, etc...
+  --zipfile=<f>;      Specify the zip file name if ZIP compressing.
+                      Default is "payload.php"
 
+Encoding modules:
+  - url: URL-encoding
+  - base64: Base64 encoding
+  - zip: ZIP compression
 
 Notes:
   - Prefix will automatically remove spaces
@@ -115,18 +122,34 @@ def prefixFunc(p):
 	except ValueError:
 		return p.encode()
 
+def encodeFunc(z,e):
+	'''Make sure all modules exist, and throw an error if any don't'''
+	to_ret=e.split(',')
+	bad_modules=[m for m in to_ret if m not in encoding_map]
+
+	if bad_modules:
+		print(f"[|x:encodeFunc]: Invalid encoding modules given: {', '.join(bad_modules)}")
+		exit(1)
+
+	return to_ret
+
+
+
+
+
+
 
 EntryFlag("help",['h',"help"],helpFunc)
 EntryArg("ip_flag",["ip"],ipFunc)
 EntryArg("id",['i',"id"],idFunc)
-EntryFlag("base64encode",['b',"base64"],lambda:True)
+EntryArg("encode",['e',"encode"],encodeFunc,default=[],recurse=["zipfile"])
 EntryFlag("list",['l',"list"],listFunc,recurse=["platform"])
 EntryArg("name",['n',"name"],lambda n:n,strictif=["list","id"])
 EntryArg("platform",['f',"platform"],platformFunc,strictif=["list","id"])
 EntryArg("port_flag",["port"],portFunc,default=3184)
-EntryFlag("urlencode",['u',"urlencode"],lambda:True)
 EntryFlag("web",['w',"web","webserver","server"],lambda:True)
 EntryArg("prefix",['P',"prefix"],prefixFunc)
 EntryFlag("persistent",['p',"persistent","persistence"],lambda:True)
+EntryArg("zipfile",["zipfile"],lambda z:z,default="payload.php")
 EntryPositional("ip",0,ipFunc,alt=["ip_flag"])
 EntryPositional("port",1,portFunc,alt=["port_flag"])
