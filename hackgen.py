@@ -1,6 +1,6 @@
 #!/usr/bin/python3
 #This script is used to help quickly generate reverse shells with a given IP
-import os,urllib.parse,socket,time,base64
+import os,urllib.parse,socket,time,base64,sys
 from globe import curse
 from ProgMenu.progmenu import MENU
 from menuentries import *
@@ -23,7 +23,11 @@ def main():
 		print(f"""[|x:main]: The \033[1m{res[0]} - {res[1]}\033[0m rshell requires an ip and/or port. Make sure they are provided!""")
 		exit(3)
 
-	data=res[2]
+	data=res[2].encode()
+
+	#Prepend a prefix if asked:
+	if PARSER["prefix"]:
+		data=PARSER["prefix"]+data
 
 	#URL encode the data if the flag was called
 	if PARSER["urlencode"]:
@@ -31,11 +35,11 @@ def main():
 
 	#Replace the ^LOCAL_IP^ and ^LOCAL_PORT^ in the data if ip and port are required
 	# data=data.replace("^LOCAL_IP^",f"""\033[94m{PARSER["ip"]}\033[0m""").replace("^LOCAL_PORT^",f"""\033[95m{PARSER["port"]}\033[0m""")
-	data=data.replace("^LOCAL_IP^",f"""{PARSER["ip"]}""").replace("^LOCAL_PORT^",f"""{PARSER["port"]}""")
+	data=data.replace(b"^LOCAL_IP^",f"""{PARSER["ip"]}""".encode()).replace(b"^LOCAL_PORT^",f"""{PARSER["port"]}""".encode())
 
 	#Base64 encode if the flag was called
 	if PARSER["base64encode"]:
-		data=base64.b64encode(data.encode()).decode()
+		data=base64.b64encode(data).decode()
 
 	#Start a webserver that will serve the payload (for easy transfers to targets)
 	if PARSER["web"]:
@@ -58,8 +62,7 @@ def main():
 		# time.sleep(3)
 
 	else:
-		print(data)
-
+		sys.stdout.buffer.write(data)
 
 
 

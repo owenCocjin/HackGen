@@ -20,10 +20,21 @@ Generate rshell payloads for a given ip and port.
   -l; --list;         List all rshells.
                       If -f was specified, only list rshells for that platform
   -n; --name=<n>;     Name of the rshell to use
+  -P; --prefix=<P>;   Prefix the payload with specific bytes.
+                      Tries to convert from hex first
+                      This causes the output to be in bytes!
   -p; --persistent;   Tells the webserver not to close after first request
   -u; --urlencode;    URL encode the rshell before outputting it
   -w; --webserver;    Start a webserver that will output the rshell instead of outputting to stdout.
                       This is useful to get the rshell directly onto a target (via curl/wget) instead of sending it as a file, etc...
+
+
+Notes:
+  - Prefix will automatically remove spaces
+  - To include prefix for PNG magic bytes, use flag:
+    -P '89504E470D0A1A0A'
+  - To include prefix for GIF magic bytes, use:
+    -P 'GIF8'
 """)
 
 def ipFunc(i:str):
@@ -97,6 +108,13 @@ def idFunc(i):
 
 	return i
 
+def prefixFunc(p):
+	'''Convert to bytes'''
+	try:
+		return bytes.fromhex(p.replace(' ',''))
+	except ValueError:
+		return p.encode()
+
 
 EntryFlag("help",['h',"help"],helpFunc)
 EntryArg("ip_flag",["ip"],ipFunc)
@@ -108,6 +126,7 @@ EntryArg("platform",['f',"platform"],platformFunc,strictif=["list","id"])
 EntryArg("port_flag",["port"],portFunc,default=3184)
 EntryFlag("urlencode",['u',"urlencode"],lambda:True)
 EntryFlag("web",['w',"web","webserver","server"],lambda:True)
+EntryArg("prefix",['P',"prefix"],prefixFunc)
 EntryFlag("persistent",['p',"persistent","persistence"],lambda:True)
 EntryPositional("ip",0,ipFunc,alt=["ip_flag"])
 EntryPositional("port",1,portFunc,alt=["port_flag"])
